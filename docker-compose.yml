@@ -1,0 +1,20 @@
+services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      # read from your .env (copy .env.example first); refuses to start without it
+      JWT_SECRET: ${JWT_SECRET:?copy .env.example to .env and set JWT_SECRET}
+      DATABASE_FILE: /app/data/notes.db
+    volumes:
+      # the SQLite database lives in a named volume, so notes survive restarts
+      - notes-data:/app/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  notes-data:
